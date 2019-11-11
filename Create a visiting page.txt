@@ -1,0 +1,28 @@
+#<id>: ontology ID
+#<port>: a free port number after (not including) 8080
+
+# run the VoCol container from the TIB/VoCol Image
+docker run --name <id>OntoVocol    --restart=always -d -p <port>:3000 tib/vocol
+
+# Add the container to the virtual network 
+docker network connect ontologyNetwork <id>OntoVocol
+
+# check if the container has been added to the network
+docker network inspect ontologyNetwork
+
+# update the NginX proxing file to reverse proxy the container to the public URL
+docker exec -it ontologyReverseProxy /bin/sh
+cd /etc/nginx/conf.d
+nano proxy.conf
+# Add the following right after the root location
+    location /<id>/ {
+        proxy_pass http://<id>OntoVocol:3000/;
+    } 
+# save and exit nano: Ctrl+X, Y, enter.
+# reload NginX
+nginx -s reload
+
+#exit the container
+exit
+
+	

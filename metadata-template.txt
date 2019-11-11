@@ -1,0 +1,17 @@
+# Ontology metadata attributes required for registration in the TIB ontolgoy hub.
+# This file should be maintaind under the source control and must be released anongside the ontology, under the same versioning scheme.
+# The file name is identical to the ontology's ttl file with .txt extension.
+
+shortName:
+title:
+description:
+autorFullName:
+authorEmail:
+maintainerFullname:
+maintainerEmail:
+keywords:
+license:
+version:
+repositoryURL:
+releaseURL:
+

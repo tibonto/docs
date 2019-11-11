@@ -1,0 +1,74 @@
+ssh chamanara@vm188077-l3s.hosting.uni-hannover.de
+chamanara, root: tibontoB7
+
+apt-get update
+sudo apt-get install unzip
+sudo apt-get install docker
+
+md tibhannover
+cd tibhannover
+git clone https://github.com/tibhannover/vocol.git
+cd /vocol
+docker build -t tib/vocol .
+
+#### For each instance use different name and port, starting from 8081
+#docker run --name streamOntoVocol --rm -d -p 8081:3000 tib/vocol "/bin/bash"
+docker run --name streamOntoVocol --restart=always -d -p 8081:3000 tib/vocol 
+docker run --name boostOntoVocol  --restart=always -d -p 8082:3000 tib/vocol 
+docker run --name rioOntoVocol    --restart=always -d -p 8083:3000 tib/vocol 
+
+#Install LDM on port 8080 and cofigure DCAT
+cd tibhannover
+git clone https://github.com/tibhannover/ldm.base.git
+cd /ldm.base
+docker build -t tib/ldm
+docker run --name ontologyRegLdm  --restart=always -d -p 8080:XXXX tib/ldm 
+
+#### Preparing Docker networking
+docker network create ontologyNetwork
+docker network connect ontologyNetwork ontologyReverseProxy
+docker network connect ontologyNetwork ckan
+
+docker network connect ontologyNetwork streamOntoVocol
+docker network connect ontologyNetwork bcoOntoVocol
+
+
+# docker network inspect ontologyNetwork
+
+
+
+#### Installing and setting Nginx (https://medium.com/@mannycodes/create-an-nginx-reverse-proxy-with-docker-a1c0aa9078f1)
+ .
+docker run -it -d -p 80:80 --network=ontologyNetwork --name ontologyReverseProxy nginx:stable-alpine
+#docker run -it -d -p 80:80 --name ontologyReverseProxy nginx:alpine
+
+## For each ontology instance (docker container with port number)
+# docker exec -it ontologyReverseProxy /bin/bash or /bin/sh
+# cd /etc/nginx/conf.d
+
+    location / {
+        proxy_pass http://ckan:5000;
+    }
+
+    location /stream {
+        proxy_pass http://streamOntoVocol:3000/; #internal port number with the tailing slash
+    } 
+
+    location /boost {
+        proxy_pass http://bcoOntoVocol:3000/;
+    } 
+nginx -s reload
+
+
+
+
+
+
+################################################################################
+docker exec -it tib/vocol /bin/bash
+cd  
+sh helper/scripts/resetApp.sh
+npm start 8080 3030
+cd home/project/vocol
+### the above three commands are better to be put in a Dockerfile that inherits from ahemid/newvocol so that they are part of the container execution.
+
