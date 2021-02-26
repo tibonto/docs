@@ -1,6 +1,8 @@
 #<id>: ontology ID
 #<port>: a free port number after (not including) 8080
 
+# If needed, pull VoCol (from https://github.com/TIBHannover/vocol) and build the image again
+
 # run the VoCol container from the TIB/VoCol Image
 docker run --name <id>OntoVocol    --restart=always -d -p <port>:3000 tib/vocol
 
