@@ -51,7 +51,7 @@ docker run -it -d -p 80:80 --network=ontologyNetwork --name ontologyReverseProxy
         proxy_pass http://streamOntoVocol:3000/; #internal port number with the tailing slash
     } 
 
-    location /boost {
+    location /boost/ {
         proxy_pass http://bcoOntoVocol:3000/;
     } 
 nginx -s reload
